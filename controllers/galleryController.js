@@ -4,21 +4,21 @@ exports.createLocation = [
   upload.array('images', 10),
   async (req, res) => {
     try {
-      console.log('Body:', req.body);
-      console.log('Files:', req.files);
+      console.log('Request body:', req.body);
+      console.log('Files uploaded:', req.files);
 
-      // Validate inputs
-      if (!req.body.name || !req.body.description || !req.body.location || !req.files || req.files.length === 0) {
-        return res.status(400).json({ message: 'Missing required fields or images' });
+      const { name, description, location } = req.body;
+
+      if (!name || !description || !location || !req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'Missing fields or images' });
       }
 
       const images = req.files.map(file => file.path);
-      console.log('Mapped images:', images);
+      console.log('Images array:', images);
 
-      // Insert into Supabase
       const { data, error } = await supabase
         .from('locations')
-        .insert([{ name: req.body.name, description: req.body.description, location: req.body.location, images }])
+        .insert([{ name, description, location, images }])
         .select();
 
       if (error) {
@@ -28,7 +28,7 @@ exports.createLocation = [
 
       res.status(201).json({ message: 'Location created successfully', location: data[0] });
     } catch (err) {
-      console.error('Server error in createLocation:', err);
+      console.error('Server error:', err);
       res.status(500).json({ message: 'Server error', error: err.message });
     }
   }
