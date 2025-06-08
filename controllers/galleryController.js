@@ -4,18 +4,23 @@ exports.createLocation = [
   upload.array('images', 10),
   async (req, res) => {
     try {
+      console.log('--- Upload request received ---');
       console.log('Request body:', req.body);
-      console.log('Files uploaded:', req.files);
+      console.log('Number of files:', req.files.length);
+      req.files.forEach((file, idx) => {
+        console.log(`File[${idx}]:`, file);
+      });
 
       const { name, description, location } = req.body;
 
       if (!name || !description || !location || !req.files || req.files.length === 0) {
-        return res.status(400).json({ message: 'Missing fields or images' });
+        return res.status(400).json({ message: 'Please provide name, description, location, and at least one image.' });
       }
 
       const images = req.files.map(file => file.path);
-      console.log('Images array:', images);
+      console.log('Image paths:', images);
 
+      // Insert into Supabase
       const { data, error } = await supabase
         .from('locations')
         .insert([{ name, description, location, images }])
