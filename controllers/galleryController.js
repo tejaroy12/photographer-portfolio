@@ -1,43 +1,39 @@
 const supabase = require('../supabase');
 
-exports.createLocation = async (req, res) => {
-  try {
-    const { name, description, location, images } = req.body;
+exports.createLocation = [
+  upload.array('images', 10),
+  async (req, res) => {
+    try {
+      console.log('Body:', req.body);
+      console.log('Files:', req.files);
 
-    if (!name || !description || !location || !images) {
-      return res.status(400).json({ message: 'Please provide name, description, location and images.' });
-    }
-
-    // Parse images if it's a string
-    let imagesData = images;
-    if (typeof images === 'string') {
-      try {
-        imagesData = JSON.parse(images);
-      } catch {
-        return res.status(400).json({ message: 'Images must be a valid JSON array.' });
+      // Validate inputs
+      if (!req.body.name || !req.body.description || !req.body.location || !req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'Missing required fields or images' });
       }
+
+      const images = req.files.map(file => file.path);
+      console.log('Mapped images:', images);
+
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('locations')
+        .insert([{ name: req.body.name, description: req.body.description, location: req.body.location, images }])
+        .select();
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        return res.status(500).json({ message: 'Failed to insert location', error });
+      }
+
+      res.status(201).json({ message: 'Location created successfully', location: data[0] });
+    } catch (err) {
+      console.error('Server error in createLocation:', err);
+      res.status(500).json({ message: 'Server error', error: err.message });
     }
-
-    if (!Array.isArray(imagesData)) {
-      return res.status(400).json({ message: 'Images must be an array.' });
-    }
-
-    // Insert into Supabase
-    const { data, error } = await supabase.from('locations').insert([
-      { name, description, location, images: imagesData }
-    ]).select();
-
-    if (error) {
-      console.error('Insert error:', error);
-      return res.status(500).json({ message: 'Failed to insert location', error });
-    }
-
-    res.status(201).json({ message: 'Location created successfully', location: data[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
   }
-};
+];
+
 
 exports.getLocations = async (req, res) => {
   try {
