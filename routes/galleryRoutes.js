@@ -1,23 +1,19 @@
 const express = require('express');
-const multer = require('multer');
-const path = require('path');
+const { upload } = require('../cloudinaryy');  // import upload from your cloudinaryy.js
 const galleryController = require('../controllers/galleryController');
 
 const router = express.Router();
 
-// Set up storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'uploads'));
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-const upload = multer({ storage });
-
-
+// Upload new location with images
 router.post('/upload-location', upload.array('images', 10), galleryController.createLocation);
+
+// Get all locations
 router.get('/', galleryController.getLocations);
+
+// Update location (text fields only)
+router.put('/:id', galleryController.updateLocation);
+
+// Delete location and images
+router.delete('/:id', galleryController.deleteLocation);
 
 module.exports = router;
