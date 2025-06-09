@@ -1,8 +1,23 @@
 const express = require('express');
-const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const galleryController = require('../controllers/galleryController');
 
-router.post('/upload-location', galleryController.createLocation);
+const router = express.Router();
+
+// Set up storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '..', 'uploads'));
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage });
+
+// Apply upload middleware here
+router.post('/upload-location', upload.array('images', 10), galleryController.createLocation);
 router.get('/', galleryController.getLocations);
 
 module.exports = router;
