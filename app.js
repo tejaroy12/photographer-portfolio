@@ -7,7 +7,7 @@ const app = express();
 const galleryRoutes = require('./routes/galleryRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 
 // Routes
