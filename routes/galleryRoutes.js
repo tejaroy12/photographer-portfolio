@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Apply upload middleware here
+
 router.post('/upload-location', upload.array('images', 10), galleryController.createLocation);
 router.get('/', galleryController.getLocations);
 
