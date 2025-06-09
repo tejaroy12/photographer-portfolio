@@ -1,5 +1,5 @@
 const express = require('express');
-const { upload } = require('../cloudinaryy');  // import upload from your cloudinaryy.js
+const { upload } = require('../cloudinary');  // import upload from your cloudinaryy.js
 const galleryController = require('../controllers/galleryController');
 
 const router = express.Router();
